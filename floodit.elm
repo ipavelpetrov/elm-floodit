@@ -1,57 +1,12 @@
 module Main exposing (main)
 
-import Html exposing (div, span, button, text)
-import Html.Attributes exposing (class, style)
+import Html exposing (div, span, button, text, node)
+import Html.Attributes exposing (class, style, rel, type_, href)
 import Html.Events exposing (onClick)
 import Random
 import Array exposing (Array)
 
 
-{- Styles -}
-
-
-scoreStyle : Html.Attribute msg
-scoreStyle =
-    style [ ( "margin", "10px" ), ( "font-size", "16px" ), ( "font-weight", "bold" ) ]
-
-
-gameStyle : Html.Attribute msg
-gameStyle =
-    style [ ( "display", "inline-block" ) ]
-
-
-panelStyle : Html.Attribute msg
-panelStyle =
-    style [ ( "display", "inline-block" ), ( "padding", "5px" ) ]
-
-
-buttonStyle : Html.Attribute msg
-buttonStyle =
-    style [ ( "background-color", "#bdc3c7" ), ( "margin", "20px" ) ]
-
-
-backgroundStyle : Html.Attribute msg
-backgroundStyle =
-    style
-        [ ( "text-align", "center" )
-        , ( "background-color", "#ecf0f1" )
-        , ( "height", "100vh" )
-        ]
-
-
-cellStyle : String -> Html.Attribute msg
-cellStyle color =
-    style
-        [ ( "display", "inline-block" )
-        , ( "height", "30px" )
-        , ( "vertical-align", "top" )
-        , ( "width", "30px" )
-        , ( "background-color", color )
-        , ( "transition", "background-color 250ms linear" )
-        ]
-
-
-{--}
 type alias ColorMatrix =
     List (List Int)
 
@@ -125,7 +80,7 @@ viewCell colors cell =
         pickColor number =
             Maybe.withDefault "white" (Array.get number colors)
     in
-        div [ class "game-cell", onClick (Click cell), cellStyle <| pickColor cell ] []
+        div [ class "cell", onClick (Click cell), style [ ( "background-color", pickColor cell ) ] ] []
 
 
 viewGame :
@@ -145,7 +100,7 @@ viewGame model =
 
         viewScore won stepNumber =
             div
-                [ scoreStyle ]
+                [ class "score" ]
                 [ text
                     (if won then
                         ("You won! Score: " ++ (toString stepNumber))
@@ -163,7 +118,7 @@ viewGame model =
                     currentColor =
                         getCurrentColor matrix
                 in
-                    div [ gameStyle ]
+                    div [ class "game" ]
                         [ div [] (viewMatrix matrix)
                         , viewScore (isWon currentColor matrix) stepNumber
                         ]
@@ -174,13 +129,14 @@ viewGame model =
 
 viewPanel : GameConfig -> Html.Html Msg
 viewPanel { colors } =
-    div [] (List.intersperse (div [ panelStyle ] []) (List.map (viewCell colors) (List.range 0 ((Array.length colors) - 1))))
+    div [] (List.intersperse (div [ class "panel" ] []) (List.map (viewCell colors) (List.range 0 ((Array.length colors) - 1))))
 
 
 view : GameApp -> Html.Html Msg
 view model =
-    div [ class "background", backgroundStyle ]
-        [ div [] [ button [ buttonStyle, onClick NewGame ] [ text "New Game" ] ]
+    div [ class "background" ]
+        [ node "link" [ rel "stylesheet", type_ "text/css", href "floodit.css" ] []
+        , div [] [ button [ class "button", onClick NewGame ] [ text "New Game" ] ]
         , viewGame model
         , viewPanel model.config
         ]
@@ -279,8 +235,14 @@ subscriptions model =
 
 generateColorMatrix : GameConfig -> Cmd Msg
 generateColorMatrix { rows, columns, colors } =
-    Random.generate InitNewGame
-        (Random.list rows (Random.list columns (Random.int 0 ((Array.length colors) - 1))))
+    let
+        max =
+            (Array.length colors) - 1
+    in
+        Random.int 0 max
+            |> Random.list columns
+            |> Random.list rows
+            |> Random.generate InitNewGame
 
 
 init : ( Model, Cmd Msg )

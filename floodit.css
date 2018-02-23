@@ -1,0 +1,33 @@
+.background {
+  text-align: center;
+  background-color: #ecf0f1;
+  height: 100vh;
+}
+
+.score {
+  margin: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.game {
+  display: inline-block
+}
+
+.panel {
+  display: inline-block;
+  padding: 5px;
+}
+
+.button {
+  background-color: #bdc3c7;
+  margin: 20px;
+}
+
+.cell {
+  display: inline-block;
+  height: 30px;
+  vertical-align: top;
+  width: 30px;
+  transition: background-color 250ms linear;
+}
